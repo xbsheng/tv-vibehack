@@ -38,3 +38,34 @@ successo al flusso dopo, e nessuna scansione dei nomi dei pacchetti prova che un
 Disattivare un assistente è uno scambio che fai con una perdita precisa (il tasto del microfono del telecomando, la
 ricerca vocale dentro le app), ed è per questo che il rapporto nomina quella perdita per ogni pacchetto, invece di
 chiamarla una vittoria.
+
+## ACR e il blocco dei suoi server
+
+Un client ACR non ha sempre un nome che lo dica. Sulle TV Google TV di TCL il frame server di Samba TV vive dentro
+`com.tcl.ttvs`, accanto al servizio di aggiornamento del firmware, quindi una ricerca dei soli nomi dei pacchetti lo
+manca. `dumpsys package r | grep -i -E 'samba|acr'` elenca i componenti che lo portano, qualunque pacchetto li
+contenga, e `pm list features | grep -i acr` mostra se il firmware attiva la funzione. L'audit nomina i pacchetti ACR
+noti da [`examples/`](../../examples/), e disattivarli è la soluzione: un client spento non invia nulla.
+
+Un blocco DNS è un secondo livello, per un client che decidi di tenere o che torna con un aggiornamento. Android TV
+non ha un file hosts che puoi modificare senza root, quindi il blocco sta sulla rete: un Pi-hole o un AdGuard Home
+che il router distribuisce come DNS, oppure un resolver Private DNS che accetta le tue regole (un profilo AdGuard DNS
+o NextDNS personale). I server pubblici di AdGuard DNS della
+[FAQ](faq.md#può-bloccare-la-pubblicità-anche-dentro-le-app) non bloccavano gli host `cid.samba.tv` di Samba TV
+quando sono stati controllati a novembre 2026. I domini di secondo livello della
+[blocklist Watching the Watchers](https://github.com/IlgarNEU/Watching-the-Watchers/tree/main/Blocklist)
+(Northeastern University, 2026), con il servizio ACR a cui appartiene ciascuno:
+
+| Blocco | Servizio ACR |
+|---|---|
+| `samba.tv` | Samba TV (TV Sony, Philips e TCL Google TV) |
+| `alphonso.tv` | Alphonso (LG webOS, alcuni box Android TV) |
+| `samsungacr.com`, `acr-us-prd.samsungcloud.tv` | Samsung |
+| `tvinteractive.tv` | Inscape (Vizio) |
+| `acr.unruly.co` | Unruly (VIDAA) |
+| `scribe.logs.roku.com` | Roku |
+
+La stessa lista dice che Samba TV si collega anche a un indirizzo fisso, `216.183.117.80`, che solo una regola del
+firewall del router ferma. Una TV che risolve i nomi tramite il proprio DNS over HTTPS salta del tutto il blocco DNS,
+e i produttori rinominano gli host, quindi controlla il log del resolver per i nomi nuovi invece di fidarti che la
+lista resti completa.
