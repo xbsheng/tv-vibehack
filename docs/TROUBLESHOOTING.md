@@ -604,6 +604,22 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   launcher that cannot be installed, not the lists. If the `Failure [...]` line names
   `INSTALL_FAILED_VERIFICATION_FAILURE` instead, that is the bullet above - the firmware's installer
   verifier, not the API level.
+- **`pm install` fails with `Requested internal only, but not enough space`**, seen on a Hitachi
+  CDH-LE32SMART21 (TCL C06, 2.5 GB `/data`, 93% full), a Sony KD-55X80J and KD-65X80J (`/data` 99%
+  full) and the second TCL 32S5400A unit (2.7 GB `/data`, 500 MB reserve): the partition is small on
+  this class of set and Android refuses the install rather than filling it. Read the reserve before
+  blaming the APK. `dumpsys devicestoragemonitor` on the TCL unit shows a fixed `lowBytes=524288000`,
+  and every install below it fails, `launcher/build-and-install.sh` included; the Hitachi unit's
+  `sys_storage_threshold_percentage` is 10, so about 270 MB of its 2.5 GB is held back.
+  `tools/tv.py 'pm trim-caches 4G'` frees the app caches and was enough there and on the KD-65X80J
+  (~450 MB), but it wants its suffix (`1G`, `4G`; a bare number answers `Invalid suffix` on a Whaley
+  WTV55K1) and freed only ~100 MB on the Hitachi unit, where the owner had to uninstall user apps he
+  did not want (~470 MB, none of them in that list). `build-and-install.sh` installs the APK on its own
+  for this reason, so a refused install leaves the stock launcher enabled and Home untouched, and it
+  reports only `pm install failed; the stock launcher was left untouched`. On a set whose shell has no
+  `CLEAR_APP_CACHE` permission (a Xiaomi MiTV4-ANSM0 on Android 6 refuses `pm trim-caches` with a
+  `SecurityException`), clear the cache from the TV's own Settings instead. TGuard's "TV storage Low"
+  popup reads the same monitor and still appeared once with `com.tcl.guard` disabled.
 - **App info opens half-width with a dark rectangle** from a tile's long-press menu on a TCL G07
   (`55P61B`, Android 11, [#1696](https://github.com/Gathin23/cleanyourtv/issues/1696)). The TV's
   `AppManagementActivity` renders the same way when opened by the standard
