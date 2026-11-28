@@ -49,7 +49,8 @@ With `"library_button": true` the library also has a round button in the top bar
 `"show_library_pill": false` to drop the pill after the last row; the button is then the way in, and
 Down from the last row and Right from the final app (Left in Hebrew) stay where they are.
 
-With `tile_menu` on, holding OK on a Home tile offers Remove from Home as well, next to Move and App info.
+With `tile_menu` on, holding OK on a Home tile offers Remove from Home as well, next to Add to dock
+(with `dock_row`), Move and App info.
 The remote's Menu key opens that same menu on the focused tile. With `tile_menu` off,
 Menu keeps its normal behavior. Settings-key mappings take priority; Menu is left alone
 on header buttons, while another popup is open, and during reordering.

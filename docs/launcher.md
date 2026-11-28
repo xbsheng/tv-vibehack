@@ -57,6 +57,13 @@ Click **Settings** for the TV's own settings. Hold OK on it for its menu:
 - **Restart…** while `HomeKeyService` runs, which opens the system power menu (a launcher may not
   restart the TV itself).
 
+**The tile menu.** With `tile_menu` (on by default since 3.3), holding OK on a tile - or pressing the
+remote's Menu key - opens a small menu: **Add to dock** on a tile outside the dock, **Replace with
+another app** on one already in it (both with `dock_row`), then **Move**, **Remove from Home** (with the
+app library) and **App info** where the firmware has that page. Add to dock asks for a dock place and
+swaps the app into it; Replace asks for the app instead, and the two swap places. Back goes a step back,
+and from the first step it leaves the menu. An empty dock place has no menu.
+
 The launcher's own page has these rows, top to bottom:
 
 - **Reorder apps**, only with `launcher_settings_button`, the same as the menu's.
