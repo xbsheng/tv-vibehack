@@ -363,6 +363,24 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   ten Amazon packages are protected, which
   [`examples/amazon-fire-tv-stick-4k-2018/debloat.txt`](../examples/amazon-fire-tv-stick-4k-2018/debloat.txt)
   lists, with the same DNS fallback for their endpoints.
+- **`pm disable-user` answers `Warning! This command is illegal!`**, and `pm list packages -d` stays
+  empty afterwards, so the whole list changed nothing. Seen on every SEI Robotics build here: the
+  [waipu.tv Stick](devices/waipu-tv-stick.md) (SEI700WP, Android 11), the
+  [waipu.tv Box](devices/waipu-tv-box.md) (SEID00BWP, Android 14), the NetTV
+  [SEI700NTV](devices/nettv-sei700ntv.md) (Android 14), the
+  [Nokia Streaming Box 8000](../examples/nokia-streaming-box-8000/README.md) (SEI600NK4, Android TV 14,
+  `UKG3.240613.001`) and the [TiVo Stream 4K](../examples/tivo-stream-4k/README.md) (SEI400TV, Android
+  TV 12, `SC.1272`). `/system/bin/pm` there is a two-line forward to `cmd package "$@"`, and the
+  refusal is in the vendor's patched `PackageManagerService`: `pm disable`, `pm disable-until-used`
+  and `pm hide` are refused too, and `pm uninstall --user 0` is refused for its core apps.
+  Unlike the Fire OS 5 box above, this firmware leaves a route. Per package,
+  `pm suspend --user 0 <package>`, `cmd appops set <package> RUN_ANY_IN_BACKGROUND ignore` and
+  `am force-stop <package>` all work, and they survive a reboot (checked on the Nokia box, the TiVo
+  and the waipu.tv Stick; not yet on the waipu.tv Box). Undo with `pm unsuspend --user 0 <package>`
+  and `cmd appops reset --user 0 <package>`. It is weaker than disabling - a suspended package still
+  receives its boot broadcasts, so some come back after every boot and need another `am force-stop` -
+  and `tools/disable.sh` records the packages and disables none, which is why those folders print
+  their own Apply and Undo loops rather than reverting through `tools/restore.sh`.
 - **`pm disable <package>/<class>` is refused with `Shell cannot change component state`**, the
   `SecurityException` you get when you try to keep a package and switch off only its Home activity or
   boot receiver. The notes here have it for setupwraith's `.RecoveryActivity` (TCL G08, Chromecast with
