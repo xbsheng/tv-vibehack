@@ -781,6 +781,30 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   `com.heytap.tv.launcher` (stock, do not overwrite) and `com.oppo.tv.launcher2`. The list is at
   [`examples/oppo-k9-55-oppocnm632/`](../examples/oppo-k9-55-oppocnm632/) and the full note is
   `docs/devices/oppo-k9-55-oppocnm632.md`.
+- **`set-home-activity` answers `cannot be home on user 0` and no app takes Home at all**, seen on
+  two China-market Coocaa builds (`com.tianci.*` / `com.coocaa.*`, both Android 8.0): a Skyworth
+  8R40_K5C (Realtek `rtd285x`) and a Skyworth 8N05 Q30 (`sky8N05`, Novatek NT72671). It is the
+  message the two Xiaomi entries above report, from a different cause. `cmd package
+  resolve-activity -c android.intent.category.HOME` answers "No activity found" on the 8R40 unit -
+  that firmware ships no package declaring HOME, the stock launcher included - and the home page is
+  started by `com.tianci.system` from `persist.service.homepage.pkg` / `.cls`. Those props do take a
+  third-party launcher at runtime, but they are rewritten at every boot from `DEFAULT_HOMEPAGE` in
+  the read-only `/system/pcfg/<board>/config/general_config.xml`, and which home actually launches
+  comes from `/system/etc/bootintent.xml`, so a change lasts one power cycle and making it stick
+  needs root. Disabling `com.tianci.movieplatform` is not the way round it: it leaves a black screen
+  with `sys.boot_completed` never set on the 8R40 unit, and the 8N05 session left it alone because
+  an owner on the same firmware family got that from one disable, so the set then needs a factory
+  reset. The accessibility redirect is out as well: the 8N05 build binds no third-party
+  accessibility service (the `enabled_accessibility_services` write is accepted, `dumpsys
+  accessibility` still reports `services:{}`, and there is no accessibility settings screen to bind
+  one from). What is left is what the 8R40 note prints: keep the stock launcher installed and
+  enabled and open another launcher from My Apps, and on that unit an injected `KEYCODE_HOME` is
+  ignored by the stock home while `am start -a android.intent.action.MAIN -c
+  android.intent.category.HOME` does bring a sideloaded launcher forward. The refusal belongs to the
+  Android 8.0 firmware line rather than to the brand - the Android 11 Coocaa unit in
+  [#417](https://github.com/Gathin23/cleanyourtv/issues/417) accepted `set-home-activity` - so read
+  the build before writing the set off. Full notes:
+  [8R40_K5C](devices/skyworth-8r40-k5c.md) and [8N05 Q30](devices/skyworth-8n05-q30.md).
 - **The new launcher still doesn't own Home** after the stock one is disabled, seen on Google TV
   (Xiaomi MiTV-MOOR2). Another system app answers HOME: `com.google.android.tungsten.setupwraith`,
   with `.MainActivity` at intent-filter priority 4 and `.RecoveryActivity` at priority 1. You
